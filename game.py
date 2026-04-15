@@ -2,10 +2,22 @@ import sqlite3
 import random
 import hashlib
 
-
-def véletlen():
-    vél=random.Random()
-    return vél.randrange (len(datas))
+def init_sql():
+    import os
+    if os.path.exists("szavak.db"):
+        return
+    base = sqlite3.connect("szavak.db")
+    t = base.cursor()
+    t.execute("""CREATE TABLE IF NOT EXISTS szavmon (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        szó TEXT NOT NULL,
+        mondat1 TEXT NOT NULL,
+        mondat2 TEXT NOT NULL,
+        mondat3 TEXT NOT NULL,
+        mondat4 TEXT NOT NULL
+    )""")
+    base.commit()
+    base.close()
 
 def rekord(list,x):
     return list[x]
@@ -13,14 +25,25 @@ def rekord(list,x):
 def adat(list,x,y):
     return list[x][y]
 
-
+# we should initiate the database before using it and if it doesnt exist it will be created
+init_sql()
 base=sqlite3.connect("szavak.db")
 t=base.cursor()
-adatok=t.execute("Select szó,mondat1,mondat2,mondat3,mondat4 from szavmon")
+adatok=t.execute("Select szó,mondat1,mondat2,mondat3,mondat4 from szavmon;")
 
+# initiation of all variables must be done before using it
 datas=[list(adat) for adat in adatok]
 szám=[]
+
+def véletlen():
+    global datas
+    if not datas:
+        return 0
+    vél=random.Random()
+    return vél.randrange(start=0, stop=len(datas))
+
 szám.append(véletlen())
+
 #***************************************************************************
 pontok=0
 def game(szám,pontok):
@@ -126,23 +149,6 @@ def bejelentkezés():
         else:
             print("Sikertelen bejelentkezés!\n")
 
-while 1:
-    print("********** Login System **********")
-    print("1.Regisztráció")
-    print("2.Bejelentkezés")
-    print("3.Kilépés")
-    
-    választás = int(input("Válasszon a lehetőségek közül: "))
-    
-    if választás == 1:
-        regisztráció()
-    elif választás == 2:
-        bejelentkezés()
-    elif választás == 3:
-        break
-    else:
-        print("Rossz válasz!")
-
 #*******************************************************************************
 
 ##print(adat(datas,szám[0],0))#szó#
@@ -153,5 +159,22 @@ while 1:
 
 #********************************************************************************
 
+if __name__ == "__main__":
+    # this file program will only execute if we run this file and not if we import it as a module in another file
 
+    while True:
+        print("********** Login System **********")
+        print("1.Regisztráció")
+        print("2.Bejelentkezés")
+        print("3.Kilépés")
+    
+        választás = int(input("Válasszon a lehetőségek közül: "))
 
+        if választás == 1:
+            regisztráció()
+        elif választás == 2:
+            bejelentkezés()
+        elif választás == 3:
+            break
+        else:
+            print("Rossz válasz!")
